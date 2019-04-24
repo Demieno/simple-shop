@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+{% block content %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 order-md-2 mb-4">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Корзина</span>
+            <span class="badge badge-secondary badge-pill">{{cart.products.count}}</span>
+          </h4>
+          <ul class="list-group mb-3">
+          {%for product in cart.products.all%}
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">{{product.product.title}}</h6>
+                <small class="text-muted">
+                  <a class="badge" href="{%url 'increase' product_slug=product.product.slug %}" role="button">+ </a>
+                  {{product.quantity}} 
+                  <a class="badge" href="{%url 'decrease' product_slug=product.product.slug %}"> - </a>
+                  <a class="badge badge-danger" href="{%url 'remove' product_slug=product.product.slug %}"> удалить</a>
+                </small>
+              </div>
+              <span class="text-muted"> {{product.total}}</span>
+            </li>
+          {% endfor %}
+          {% for code in promocode%}
+            <li class="list-group-item d-flex justify-content-between bg-light">
+              <div class="text-success">
+                <h6 class="my-0">Промокод</h6>
+                <small>{{code.title}}</small>
+              </div>
+              <span class="text-success">{{code.total}}</span>
+            </li>
+          {%endfor %}  
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Total (RU)</span>
+              <strong>{{cart.total}}</strong>
+            </li>
+          </ul>
+          <form class="card p-2" method = "post" >
+            {% csrf_token %}
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Promo code"id="id_code" name = "code" >
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-secondary">Ввести</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-8 order-md-1">
+          <h4 class="mb-3">Адрес доставки</h4>
+          <form class="needs-validation" novalidate="">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName">Имя</label>
+                <input type="text" class="form-control" id="firstName" placeholder="" value="" required="">
+                <div class="invalid-feedback">
+                  Поле имя обязательно.
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName">Фамилия</label>
+                <input type="text" class="form-control" id="lastName" placeholder="" value="" required="">
+                <div class="invalid-feedback">
+                  Поле фамилия обязательно
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email">Email</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">@</span>
+                </div>
+                <input type="text" class="form-control" id="email" placeholder="you@example.com" required="">
+                <div class="invalid-feedback" style="width: 100%;">
+                  Поле email обязательно, введите его для отслеживания доставки.
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="address">Адрес</label>
+              <input type="text" class="form-control" id="address" placeholder="1234 Main St" required="">
+              <div class="invalid-feedback">
+                Please enter your shipping address.
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-5 mb-3">
+                <label for="country">Страна</label>
+                <select class="custom-select d-block w-100" id="country" required="">
+                  <option value="">Выбрать</option>
+                  <option>Россия</option>
+                </select>
+                <div class="invalid-feedback">
+                  Please select a valid country.
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="state">Регион</label>
+                <select class="custom-select d-block w-100" id="state" required="">
+                  <option value="">Выбрать</option>
+                  <option>Кемеровская область</option>
+                </select>
+                <div class="invalid-feedback">
+                  Please provide a valid state.
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="zip">Индекс</label>
+                <input type="text" class="form-control" id="zip" placeholder="" required="">
+                <div class="invalid-feedback">
+                  Zip code required.
+                </div>
+              </div>
+            </div>
+            <hr class="mb-4">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="save-info">
+              <label class="custom-control-label" for="save-info">Сохранить эту информацию для последующих операций</label>
+            </div>
+            <hr class="mb-4">
+
+            <h4 class="mb-3">Оплата</h4>
+            <script src="https://api.fondy.eu/static_common/v1/checkout/ipsp.js"></script>
+            <script>
+            function checkoutInit(url) {
+              $ipsp('checkout').scope(function() {
+                this.setCheckoutWrapper('#checkout_wrapper');
+                this.addCallback(__DEFAULTCALLBACK__);
+                this.action('show', function(data) {
+                  $('#checkout_loader').remove();
+                  $('#checkout').show();
+                });
+                this.action('hide', function(data) {
+                  $('#checkout').hide();
+                });
+                this.action('resize', function(data) {
+                  $('#checkout_wrapper').width(800).height(data.height);
+                });
+                this.loadUrl(url);
+              });
+            };
+            var button = $ipsp.get("button");
+            button.setMerchantId(1396424);
+            button.setAmount({{cart.total}}, 'RUB', true);
+            button.setHost('api.fondy.eu');
+            checkoutInit(button.getUrl());
+            </script>
+
+            <div id="checkout">
+              <div id="checkout_wrapper"></div>
+            </div>
+        </div>
+      </div>
+{% endblock content %}
+
+{%block footer%}
+ <footer class="my-5 pt-5 text-muted text-center text-small"> </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="../../assets/js/vendor/popper.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <script src="../../assets/js/vendor/holder.min.js"></script>
+    <script>
+      // Example starter JavaScript for disabling form submissions if there are invalid fields
+      (function() {
+        'use strict';
+
+        window.addEventListener('load', function() {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName('needs-validation');
+
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
+    </script>
+{%endblock footer%}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block header %}
+{% endblock header %}
+{% block content %}
+<section class="text-center">
+ <div class="container my-0 col-lg-20 col-6 col-md-4 block"">
+  <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+  <label for="inputEmail" class="sr-only">Email address</label>
+  <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
+  <label for="inputPassword" class="sr-only">Password</label>
+  <br><input type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
+  <br><label><input type="checkbox" value="remember-me"> Remember me</label> 
+  <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+  </div>
+</section>
+{% endblock content %}
+
+{% block footer %}
+
+{% endblock footer %}
