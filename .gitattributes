@@ -1,2 +1,4 @@
 *.js linguist-vendored
 *.сss linguist-vendored
+static/* linguist-vendored
+static_in_dev/* linguist-vendored
